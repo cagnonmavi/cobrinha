@@ -15,11 +15,11 @@ public class Painel extends JPanel implements ActionListener {
         cobra = new Cobra();
         spawnFood();
 
-        Timer timer = new Timer(95, this);
+        Timer timer = new Timer(100, this);
         timer.start();
 
         setPreferredSize(new Dimension(600, 400));
-        setBackground(Color.BLACK);
+        setBackground(Color.DARK_GRAY);
         setFocusable(true);
         addKeyListener(new KeyAdapter() {
             @Override
@@ -30,7 +30,6 @@ public class Painel extends JPanel implements ActionListener {
                     case KeyEvent.VK_LEFT: if (cobra.getDirection() != 'R') cobra.setDirection('L'); break;
                     case KeyEvent.VK_RIGHT: if (cobra.getDirection() != 'L') cobra.setDirection('R'); break;
                     case KeyEvent.VK_ENTER: if (!running) restartGame(); break; // Reiniciar
-
                 }
             }
         });
@@ -43,8 +42,11 @@ public class Painel extends JPanel implements ActionListener {
 
     private void spawnFood() {
         Random random = new Random();
-        int x = random.nextInt(30) * 20;
-        int y = random.nextInt(20) * 20;
+        int x, y;
+        do {
+            x = random.nextInt(30) * 20;
+            y = random.nextInt(20) * 20;
+        } while (cobra.getBody().contains(new Point(x, y)));
         food = new Point(x, y);
     }
 
@@ -57,22 +59,27 @@ public class Painel extends JPanel implements ActionListener {
     private void draw(Graphics g) {
         if (running) {
             g.setColor(Color.RED);
-            g.fillRect(food.x, food.y, 20, 20);
+            g.fillOval(food.x, food.y, 20, 20); // Fruta como círculo
 
             g.setColor(Color.PINK);
             for (Point point : cobra.getBody()) {
                 g.fillRect(point.x, point.y, 20, 20);
             }
+
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString("Score: " + cobra.getBody().size(), 10, 20); // pontuação
         } else {
             showGameOver(g);
         }
         Toolkit.getDefaultToolkit().sync();
     }
 
+
     private void move() {
         cobra.move();
         if (cobra.getBody().getFirst().equals(food)) {
-            cobra.grow(); // Crescer
+            cobra.grow(); // Cresce
             spawnFood();
         } else {
             cobra.removeTail();
@@ -90,7 +97,8 @@ public class Painel extends JPanel implements ActionListener {
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 30));
         g.drawString("Game Over", 100, 150);
-        g.drawString("Pressione ENTER para reiniciar", 100, 300);
+        g.setFont(new Font("Arial", Font.PLAIN, 20));
+        g.drawString("Pressione ENTER para reiniciar", 80, 250);
     }
 
     private void restartGame() {
